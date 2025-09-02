@@ -1,0 +1,67 @@
+:root{
+  --bg: #0d1117;
+  --card: #161b22;
+  --text: #c9d1d9;
+  --muted: #8b949e;
+  --accent: #1f6feb;
+  --border: #30363d;
+  --good: #2ea043;
+  --warn: #d29922;
+  --bad: #f85149;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji;
+}
+.container{max-width:880px;margin:0 auto;padding:16px}
+header{padding-top:24px}
+.subtitle{color:var(--muted);margin-top:-8px}
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:16px;
+  margin:16px 0;
+}
+.row{display:flex;gap:12px}
+.gap{gap:12px}
+.space-between{justify-content:space-between}
+.middle{align-items:center}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.btn{
+  background:var(--accent);
+  color:white;
+  border:none;
+  border-radius:8px;
+  padding:8px 12px;
+  cursor:pointer;
+}
+.btn[disabled]{opacity:.6;cursor:not-allowed}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text)}
+.kv{list-style:none;padding:0;margin:0}
+.kv li{display:flex;justify-content:space-between;border-top:1px dashed var(--border);padding:8px 0}
+.kv li:first-child{border-top:none}
+.muted{color:var(--muted)}
+.hint{color:var(--warn);font-size:.9rem}
+.metric{font-size:2.2rem;display:flex;align-items:baseline;gap:4px}
+.value{font-weight:700;letter-spacing:.5px}
+.prefix{opacity:.8}
+.small{font-size:.9rem}
+label span{display:block;margin-bottom:6px}
+input[type="number"]{width:100%;padding:10px;border-radius:8px;border:1px solid var(--border);background:#0b1116;color:var(--text)}
+.qr-live{position:relative;display:grid;place-items:center;background:#0b1116;border:1px dashed var(--border);border-radius:8px;min-height:220px;margin:8px 0}
+#qr-video{width:100%;max-height:360px;border-radius:8px}
+.output{white-space:pre-wrap;background:#0b1116;border:1px solid var(--border);border-radius:8px;padding:8px;min-height:44px}
+footer{padding-bottom:32px}
+/* System banners */
+.banners{position:sticky;top:0;z-index:1000}
+.banner{display:flex;gap:12px;justify-content:space-between;align-items:center;background:#11161c;border-bottom:1px solid var(--border);padding:10px 16px;color:var(--text)}
+.banner.warn{background:#161a12;color:var(--text)}
+.banner .btn{padding:6px 10px}
+@media (max-width:640px){
+  .grid-2{grid-template-columns:1fr}
+}

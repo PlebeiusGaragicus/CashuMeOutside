@@ -1,0 +1,37 @@
+import { defineConfig } from 'vite';
+import vue from '@vitejs/plugin-vue';
+import { VitePWA } from 'vite-plugin-pwa';
+
+export default defineConfig({
+  server: {
+    port: 5175,
+  },
+  plugins: [
+    vue(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      workbox: {
+        skipWaiting: true,
+        clientsClaim: true,
+      },
+      manifest: {
+        name: 'Bitcoin PWA Template',
+        short_name: 'BTC PWA',
+        start_url: '.',
+        display: 'standalone',
+        background_color: '#0d1117',
+        theme_color: '#0d1117',
+        description:
+          'cashu.me-inspired installable PWA with block height, price, USD↔sats converter, and QR scanner.',
+        icons: [
+          { src: 'icons/icon-192.svg', sizes: '192x192', type: 'image/svg+xml', purpose: 'any maskable' },
+          { src: 'icons/icon-512.svg', sizes: '512x512', type: 'image/svg+xml', purpose: 'any maskable' }
+        ],
+        protocol_handlers: [
+          { protocol: 'web+cashu', url: '/?token=%s' },
+          { protocol: 'web+lightning', url: '/?lightning=%s' }
+        ]
+      }
+    })
+  ]
+});
