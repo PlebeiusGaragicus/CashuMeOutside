@@ -1,11 +1,6 @@
 <template>
   <main class="container">
-    <section class="card">
-      <h2>Status</h2>
-      <ul class="kv">
-        <li><span>Network</span><span>{{ online ? 'online' : 'offline' }}</span></li>
-      </ul>
-    </section>
+    <!-- Network status card removed; header shows status via dot -->
 
     <section class="grid-2">
       <div class="card">
@@ -60,7 +55,10 @@
 import { ref, reactive, onMounted, onBeforeUnmount, watch, toRefs } from 'vue';
 
 // Props from App for network status
-const props = defineProps({ online: { type: Boolean, default: typeof navigator !== 'undefined' ? navigator.onLine : true } });
+const props = defineProps({
+  online: { type: Boolean, default: typeof navigator !== 'undefined' ? navigator.onLine : true },
+  lastOnlineAt: { type: Number, default: 0 },
+});
 const { online } = toRefs(props);
 
 // Local storage helpers

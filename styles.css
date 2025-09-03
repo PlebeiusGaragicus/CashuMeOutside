@@ -100,6 +100,11 @@ footer{padding-bottom:32px}
 .hamburger::before{ top:-6px; }
 .hamburger::after{ top:6px; }
 
+/* Connection status dot */
+.status-dot{ width:10px; height:10px; border-radius:50%; display:inline-block; border:1px solid var(--border); box-shadow:0 0 0 1px rgba(255,255,255,.04) inset; }
+.status-dot.ok{ background:var(--good); }
+.status-dot.bad{ background:var(--bad); }
+
 /* Side drawer */
 .side-drawer{ position:fixed; inset:0; pointer-events:none; z-index:2000; }
 .side-drawer .backdrop{ position:absolute; inset:0; background:rgba(0,0,0,.4); opacity:0; transition:opacity .2s ease; }

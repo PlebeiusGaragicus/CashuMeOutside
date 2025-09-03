@@ -6,9 +6,6 @@
         <span>Update available. Reload to get the latest version.</span>
         <button class="btn btn-ghost" @click="reload">Reload</button>
       </div>
-      <div v-if="!online" class="banner warn">
-        <span>You are offline. Some features are unavailable.</span>
-      </div>
       <div v-if="showIosBanner" class="banner">
         <span>Install this app: tap Share, then "Add to Home Screen".</span>
         <button class="btn btn-ghost" @click="dismissIos">Dismiss</button>
@@ -27,6 +24,7 @@
         </template>
         <div class="row gap middle" style="margin-left:auto;padding:0 16px;">
           <button v-if="showInstall" class="btn" @click="triggerInstall">Install</button>
+          <span class="status-dot" :class="online ? 'ok' : 'bad'" :title="online ? 'Connected' : 'Offline'"></span>
         </div>
       </div>
     </header>
@@ -51,7 +49,7 @@
     </div>
 
     <RouterView v-slot="{ Component }">
-      <component :is="Component" :online="online" />
+      <component :is="Component" :online="online" :last-online-at="lastOnlineAt" />
     </RouterView>
 
     <footer class="container small muted">
@@ -94,8 +92,21 @@ const reload = () => updateServiceWorker();
 
 // Online state
 const online = ref(navigator.onLine);
-const onOnline = () => (online.value = true);
-const onOffline = () => (online.value = false);
+const LAST_ONLINE_KEY = 'btcPwa.lastOnlineAt';
+function loadLastOnline() {
+  const v = Number(localStorage.getItem(LAST_ONLINE_KEY));
+  return Number.isFinite(v) && v > 0 ? v : Date.now();
+}
+function saveLastOnline(ts) { try { localStorage.setItem(LAST_ONLINE_KEY, String(ts)); } catch {} }
+const lastOnlineAt = ref(online.value ? loadLastOnline() : Number(localStorage.getItem(LAST_ONLINE_KEY)) || 0);
+const onOnline = () => {
+  online.value = true;
+  lastOnlineAt.value = Date.now();
+  saveLastOnline(lastOnlineAt.value);
+};
+const onOffline = () => {
+  online.value = false;
+};
 
 // Install UX
 let deferredPrompt = null;
@@ -159,6 +170,11 @@ onMounted(() => {
   document.addEventListener('keydown', onKeydown);
   // Apply saved theme on app load
   applyTheme(readTheme());
+  // Initialize last online timestamp if currently online
+  if (navigator.onLine) {
+    lastOnlineAt.value = Date.now();
+    saveLastOnline(lastOnlineAt.value);
+  }
 });
 
 onBeforeUnmount(() => {

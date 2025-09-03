@@ -3,6 +3,9 @@
     <section class="card">
       <h2>Settings</h2>
       <p class="small muted">These settings persist in your browser (LocalStorage) and are used by the Home page.</p>
+      <ul class="kv small" style="margin-top:8px">
+        <li><span>Connection</span><span>{{ connLabel }}</span></li>
+      </ul>
       <div class="row gap" style="margin-top:8px">
         <label style="width:100%">
           <span>Theme</span>
@@ -28,13 +31,19 @@
 </template>
 
 <script setup>
-import { reactive, watchEffect, onMounted } from 'vue';
+import { reactive, watchEffect, onMounted, computed, ref, onBeforeUnmount } from 'vue';
 
 const LS_SETTINGS = 'btcPwa.settings';
 function load(key, def) { try { return JSON.parse(localStorage.getItem(key)) ?? def; } catch { return def; } }
 function save(key, obj) { try { localStorage.setItem(key, JSON.stringify(obj)); } catch {}
 }
 function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
+
+// Props from App for connection info
+const props = defineProps({
+  online: { type: Boolean, default: typeof navigator !== 'undefined' ? navigator.onLine : true },
+  lastOnlineAt: { type: Number, default: 0 },
+});
 
 const settings = reactive(load(LS_SETTINGS, {
   theme: 'black',
@@ -63,10 +72,35 @@ function onThemeChange(){
   persist();
 }
 
+// Connection status label
+const tick = ref(0);
+const connLabel = computed(() => {
+  if (props.online) return 'Connected';
+  const ts = props.lastOnlineAt || 0;
+  if (!ts) return 'Disconnected';
+  const diff = Math.max(0, Date.now() - ts);
+  const s = Math.floor(diff / 1000);
+  if (s < 60) return `Last connected ${s}s ago`;
+  const m = Math.floor(s / 60);
+  if (m < 60) return `Last connected ${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `Last connected ${h}h ago`;
+  const d = Math.floor(h / 24);
+  return `Last connected ${d}d ago`;
+});
+
 // Persist toggles immediately
 watchEffect(persist);
 
 onMounted(() => {
   applyTheme(settings.theme);
+  // update relative time label
+  tick.value = 0;
+  tickTimer = setInterval(() => { tick.value++; }, 1000);
+});
+
+let tickTimer = null;
+onBeforeUnmount(() => {
+  if (tickTimer) clearInterval(tickTimer);
 });
 </script>
