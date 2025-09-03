@@ -1,0 +1,3 @@
+[submodule "Inspiration/cashu.me"]
+	path = Inspiration/cashu.me
+	url = git@github.com:PlebeiusGaragicus/cashu.me.git
