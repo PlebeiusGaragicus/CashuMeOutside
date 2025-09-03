@@ -17,13 +17,31 @@
 
     <header class="container">
       <div class="row space-between middle">
-        <div>
-          <h1>Bitcoin PWA Template</h1>
-          <p class="subtitle">cashu.me-inspired, lightweight, installable PWA</p>
+        <div class="row middle gap">
+          <button class="btn btn-ghost hamburger-btn" aria-label="Menu" @click="toggleDrawer">
+            <span class="hamburger" aria-hidden="true"></span>
+          </button>
+          <div>
+            <h1>Bitcoin PWA Template</h1>
+            <p class="subtitle">cashu.me-inspired, lightweight, installable PWA</p>
+          </div>
         </div>
-        <button v-if="showInstall" class="btn" @click="triggerInstall">Install</button>
+        <div class="row gap middle">
+          <button v-if="showInstall" class="btn" @click="triggerInstall">Install</button>
+        </div>
       </div>
     </header>
+
+    <div class="side-drawer" :class="{ open: drawerOpen }">
+      <div class="backdrop" @click="closeDrawer"></div>
+      <aside class="panel" @click.stop>
+        <nav class="nav">
+          <RouterLink class="nav-item" to="/" @click="closeDrawer">Home</RouterLink>
+          <RouterLink class="nav-item" to="/settings" @click="closeDrawer">Settings</RouterLink>
+          <a class="nav-item" :href="repoUrl" target="_blank" rel="noopener" @click="closeDrawer">GitHub Repo</a>
+        </nav>
+      </aside>
+    </div>
 
     <RouterView v-slot="{ Component }">
       <component :is="Component" :online="online" />
@@ -40,6 +58,7 @@ import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { useRegisterSW } from 'virtual:pwa-register/vue';
 
 const year = new Date().getFullYear();
+const repoUrl = import.meta.env.VITE_REPO_URL || 'https://github.com/your-org/your-repo';
 
 // PWA update banner
 const { needRefresh, updateServiceWorker } = useRegisterSW({ immediate: true });
@@ -89,6 +108,12 @@ function dismissIos() {
   showIosBanner.value = false;
 }
 
+// Side drawer
+const drawerOpen = ref(false);
+function toggleDrawer() { drawerOpen.value = !drawerOpen.value; }
+function closeDrawer() { drawerOpen.value = false; }
+function onKeydown(e) { if (e.key === 'Escape') closeDrawer(); }
+
 onMounted(() => {
   window.addEventListener('online', onOnline);
   window.addEventListener('offline', onOffline);
@@ -103,10 +128,12 @@ onMounted(() => {
   });
   refreshInstallUI();
   maybeShowIosBanner();
+  document.addEventListener('keydown', onKeydown);
 });
 
 onBeforeUnmount(() => {
   window.removeEventListener('online', onOnline);
   window.removeEventListener('offline', onOffline);
+  document.removeEventListener('keydown', onKeydown);
 });
 </script>

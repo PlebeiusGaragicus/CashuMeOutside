@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview --port 5174"
+    "preview": "vite preview --port 5174",
+    "icons": "node scripts/gen-icons.mjs"
   },
   "dependencies": {
     "vue": "^3.4.21",
@@ -14,6 +15,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.4",
+    "sharp": "^0.33.2",
     "vite": "^5.2.0",
     "vite-plugin-pwa": "^0.19.8"
   }

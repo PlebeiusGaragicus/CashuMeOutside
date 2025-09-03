@@ -4,7 +4,6 @@
       <h2>Status</h2>
       <ul class="kv">
         <li><span>Network</span><span>{{ online ? 'online' : 'offline' }}</span></li>
-        <li><span>Camera</span><span>{{ cameraAvailable ? 'available' : 'unavailable' }}</span></li>
       </ul>
     </section>
 
@@ -53,37 +52,7 @@
       </div>
       <p class="hint small" v-if="state.priceUsd == null">Fetch price to enable converter.</p>
     </section>
-
-    <section class="card">
-      <div class="row space-between middle">
-        <h3>QR scanner</h3>
-        <div class="row gap">
-          <button class="btn" :disabled="scanning" @click="startScan">Start</button>
-          <button class="btn btn-ghost" :disabled="!scanning" @click="stopScan">Stop</button>
-        </div>
-      </div>
-      <div class="qr-live" v-show="scanning">
-        <video id="qr-video" ref="videoRef" autoplay playsinline></video>
-      </div>
-      <div class="row gap">
-        <input id="qr-file" type="file" accept="image/*" @change="onFile" />
-        <button id="btn-copy-qr" class="btn" :disabled="!state.qrText" @click="copyQr">Copy</button>
-      </div>
-      <div id="qr-output" class="output small" :class="{ muted: !state.qrText }">{{ state.qrText || 'No result yet.' }}</div>
-    </section>
-
-    <section class="card">
-      <h3>Settings</h3>
-      <div class="row gap">
-        <label><input id="auto-height" type="checkbox" v-model="settings.autoHeight" /> Auto-refresh height</label>
-        <label><input id="auto-price" type="checkbox" v-model="settings.autoPrice" /> Auto-refresh price</label>
-        <label>
-          <span>Poll interval (sec)</span>
-          <input id="poll-interval" type="number" min="5" :value="settings.pollIntervalSec" @input="onIntervalInput" />
-        </label>
-      </div>
-      <p class="hint small">Network-only for external APIs. The service worker caches only the app shell.</p>
-    </section>
+    
   </main>
 </template>
 
@@ -112,7 +81,6 @@ const state = reactive(load(LS_STATE, {
   priceUsd: null,
   priceUpdated: null,
   priceSource: '',
-  qrText: '',
 }));
 
 const settings = reactive(load(LS_SETTINGS, {
@@ -224,132 +192,14 @@ function setupPolling() {
   tick();
   pollTimer = setInterval(tick, iv * 1000);
 }
-function onIntervalInput(e) {
-  const v = clamp(Number(e.target.value) || 30, 5, 3600);
-  settings.pollIntervalSec = v;
-  e.target.value = String(v);
-  persistSettings();
-}
 
-// QR scanning
-const videoRef = ref(null);
-let barcodeDetector = null;
-let scanning = ref(false);
-let stopScanLoop = null;
-let zxingReader = null;
-
-if ('BarcodeDetector' in window) {
-  try { barcodeDetector = new window.BarcodeDetector({ formats: ['qr_code'] }); } catch {}
-}
-
-async function ensureZXing() {
-  if (zxingReader) return zxingReader;
-  const mod = await import('https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.4/+esm');
-  zxingReader = new mod.BrowserQRCodeReader();
-  return zxingReader;
-}
-
-function showQRResult(text) {
-  state.qrText = text || '';
-}
-
-async function startScan() {
-  if (scanning.value) return; scanning.value = true; showQRResult('');
-  const constraints = { video: { facingMode: 'environment' }, audio: false };
-  let stream;
-  try {
-    stream = await navigator.mediaDevices.getUserMedia(constraints);
-  } catch (e) {
-    showQRResult('Camera denied/unavailable. Use image upload instead.');
-    stopScan();
-    return;
-  }
-
-  const video = videoRef.value;
-  video.srcObject = stream;
-  await video.play();
-
-  if (barcodeDetector) {
-    const loop = async () => {
-      if (!scanning.value) return;
-      try {
-        const results = await barcodeDetector.detect(video);
-        if (results && results.length) {
-          showQRResult(results[0].rawValue || '');
-          stopScan();
-          return;
-        }
-      } catch {}
-      requestAnimationFrame(loop);
-    };
-    stopScanLoop = () => { scanning.value = false; };
-    loop();
-    return;
-  }
-
-  try {
-    const reader = await ensureZXing();
-    reader.decodeFromVideoDevice(null, video, (result, err) => {
-      if (result) {
-        showQRResult(result.getText());
-        stopScan();
-      }
-    });
-    stopScanLoop = () => { scanning.value = false; reader.reset(); };
-  } catch (e) {
-    showQRResult('Scanning not supported in this browser. Try image upload.');
-    stopScan();
-  }
-}
-
-function stopScan() {
-  if (!scanning.value) return; scanning.value = false;
-  if (stopScanLoop) { try { stopScanLoop(); } catch {} finally { stopScanLoop = null; } }
-  const video = videoRef.value;
-  const stream = video?.srcObject;
-  if (stream) { for (const t of stream.getTracks()) t.stop(); video.srcObject = null; }
-}
-
-async function onFile(e) {
-  const file = e.target.files?.[0];
-  if (!file) return;
-  showQRResult('Decoding…');
-  const url = URL.createObjectURL(file);
-  try {
-    if (barcodeDetector) {
-      const imgBitmap = await createImageBitmap(file);
-      const results = await barcodeDetector.detect(imgBitmap);
-      if (results && results.length) { showQRResult(results[0].rawValue || ''); return; }
-    }
-    const reader = await ensureZXing();
-    const img = new Image();
-    await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = url; });
-    const result = await reader.decodeFromImageElement(img);
-    showQRResult(result.getText());
-  } catch (e) {
-    showQRResult('No QR found in image.');
-  } finally {
-    URL.revokeObjectURL(url);
-  }
-}
-
-async function copyQr() {
-  if (!state.qrText) return;
-  try { await navigator.clipboard.writeText(state.qrText); } catch {}
-}
-
-// Camera availability
-const cameraAvailable = ref(false);
+// Ensure polling is initialized
 onMounted(async () => {
-  persistSettings(); // ensure polling
-  try {
-    cameraAvailable.value = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.isSecureContext);
-  } catch { cameraAvailable.value = false; }
+  persistSettings();
 });
 
 onBeforeUnmount(() => {
   if (pollTimer) clearInterval(pollTimer);
-  stopScan();
 });
 
 // Initial populate if online

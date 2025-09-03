@@ -1,5 +1,16 @@
 # A Guide to cashu.me PWA setup
 
+Alignment note (for this repo): This document describes the Quasar-based cashu.me app. Our template uses Vue 3 + Vite + vite-plugin-pwa. For the authoritative template guide, see `docs/VUE.md`. Concept mapping:
+
+- Note for this template: Protocol handlers (`web+cashu`, `web+lightning`) and the QR scanner are not implemented in this Vue + Vite template. Mentions of those features below reflect how cashu.me works and are kept for background only.
+
+- Quasar Workbox PWA mode → `vite-plugin-pwa` in `vite.config.js`
+- `generateSW` defaults → `registerType: 'autoUpdate'`, `workbox: { skipWaiting, clientsClaim }`
+- `src-pwa/register-service-worker.js` → `useRegisterSW` usage in `src/App.vue`
+- `src-pwa/manifest.json` → `manifest` block in `vite.config.js`
+- Install prompts components → Install button + iOS banner in `src/App.vue`
+- Offline strategy → App shell precached only; external APIs fetched with `cache: 'no-store'`
+
 The purpose of this guide is to explain to a new software engineer how to create a PWA in the same fashion as cashu.me.  The sections below will explain PWA best practices and use examples from this repo to explain how a project can be created in the same fasion.
 
 Cashu.me is a well-known and fully-functional PWA whose example should be emulated by other software.

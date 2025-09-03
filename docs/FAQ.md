@@ -1,6 +1,16 @@
 # cashu.me PWA FAQ
 
-This FAQ explains the key pieces of the cashu.me PWA stack and why certain security-minded choices were made. It complements `TUTORIAL/PWA.md` and points to exact files in this repository.
+Alignment note (for this repo): This FAQ describes the Quasar-based cashu.me app. Our template uses Vue 3 + Vite + vite-plugin-pwa. See `docs/VUE.md` for the authoritative guide in this repo. Concept mapping:
+
+> Template-specific note: This Vue + Vite template does not implement protocol handlers (`web+cashu`, `web+lightning`) or the QR scanner. Those features are documented below as they exist in cashu.me for reference only.
+
+- Quasar PWA (Workbox) → `vite-plugin-pwa` in `vite.config.js`
+- SW lifecycle hooks in `src-pwa/register-service-worker.js` → `useRegisterSW` in `src/App.vue`
+- Manifest `src-pwa/manifest.json` → `manifest` block in `vite.config.js`
+- PWA install components → install button + iOS banner in `src/App.vue`
+- Offline strategy → App shell only; external APIs are network-only (`cache: 'no-store'`)
+
+This FAQ explains the key pieces of the cashu.me PWA stack and why certain security-minded choices were made. It complements `docs/PWA.md` (cashu.me guide) and `docs/VUE.md` (this repo's Vue + Vite guide).
 
 - See also: `quasar.config.js`, `src-pwa/manifest.json`, `src-pwa/register-service-worker.js`, `src/pages/WalletPage.vue`, `src/boot/base.js`.
 
@@ -127,8 +137,13 @@ Practical tips:
 
 ## Commands
 
-- Dev server: `npm run dev` (HTTPS, see `quasar.config.js` devServer).
-- Build PWA: `npm run build:pwa`.
+For this Vue + Vite template (this repo):
+
+- Dev: `npm run dev` (http://localhost:5175)
+- Build: `npm run build`
+- Preview: `npm run preview` (http://localhost:5174)
+
+For the cashu.me project (Quasar CLI), see its repository for specific commands.
 
 ---
 
