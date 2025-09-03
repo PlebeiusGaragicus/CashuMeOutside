@@ -17,9 +17,14 @@
 
     <header class="app-header">
       <div class="toolbar">
-        <button class="btn btn-ghost hamburger-btn" aria-label="Menu" @click="toggleDrawer">
-          <span class="hamburger" aria-hidden="true"></span>
-        </button>
+        <template v-if="isSettings">
+          <button class="link-back" @click="goHome">&lt; Home</button>
+        </template>
+        <template v-else>
+          <button class="btn btn-ghost hamburger-btn" aria-label="Menu" @click="toggleDrawer">
+            <span class="hamburger" aria-hidden="true"></span>
+          </button>
+        </template>
         <div class="row gap middle" style="margin-left:auto;padding:0 16px;">
           <button v-if="showInstall" class="btn" @click="triggerInstall">Install</button>
         </div>
@@ -31,10 +36,6 @@
       <aside class="panel" @click.stop>
         <nav class="nav">
           <!-- <div class="section-header">Navigate</div> -->
-          <RouterLink class="nav-item" to="/" @click="closeDrawer">
-            <div class="item-title">Home</div>
-            <!-- <div class="item-caption">Overview</div> -->
-          </RouterLink>
           <!-- <div class="section-header">Settings</div> -->
           <RouterLink class="nav-item" to="/settings" @click="closeDrawer">
             <div class="item-title">Settings</div>
@@ -60,11 +61,32 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, onMounted, onBeforeUnmount, computed } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { useRegisterSW } from 'virtual:pwa-register/vue';
 
 const year = new Date().getFullYear();
 const repoUrl = import.meta.env.VITE_REPO_URL || 'https://github.com/your-org/your-repo';
+
+// Router + route state
+const route = useRoute();
+const router = useRouter();
+const isSettings = computed(() => route.name === 'settings');
+function goHome(){
+  closeDrawer();
+  router.push('/');
+}
+
+// Theme application
+const LS_SETTINGS = 'btcPwa.settings';
+function readTheme() {
+  try { return (JSON.parse(localStorage.getItem(LS_SETTINGS) || '{}').theme) || 'black'; } catch { return 'black'; }
+}
+function applyTheme(theme) {
+  document.body.dataset.theme = theme;
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', theme === 'bitcoin' ? '#2d293b' : '#000000');
+}
 
 // PWA update banner
 const { needRefresh, updateServiceWorker } = useRegisterSW({ immediate: true });
@@ -135,6 +157,8 @@ onMounted(() => {
   refreshInstallUI();
   maybeShowIosBanner();
   document.addEventListener('keydown', onKeydown);
+  // Apply saved theme on app load
+  applyTheme(readTheme());
 });
 
 onBeforeUnmount(() => {

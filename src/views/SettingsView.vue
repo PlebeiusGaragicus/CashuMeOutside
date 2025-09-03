@@ -4,6 +4,15 @@
       <h2>Settings</h2>
       <p class="small muted">These settings persist in your browser (LocalStorage) and are used by the Home page.</p>
       <div class="row gap" style="margin-top:8px">
+        <label style="width:100%">
+          <span>Theme</span>
+          <select id="theme-select" v-model="settings.theme" @change="onThemeChange">
+            <option value="black">Black (flat)</option>
+            <option value="bitcoin">Bitcoin</option>
+          </select>
+        </label>
+      </div>
+      <div class="row gap" style="margin-top:8px">
         <label><input id="auto-height-settings" type="checkbox" v-model="settings.autoHeight" /> Auto-refresh block height</label>
         <label><input id="auto-price-settings" type="checkbox" v-model="settings.autoPrice" /> Auto-refresh price</label>
       </div>
@@ -19,7 +28,7 @@
 </template>
 
 <script setup>
-import { reactive, watchEffect } from 'vue';
+import { reactive, watchEffect, onMounted } from 'vue';
 
 const LS_SETTINGS = 'btcPwa.settings';
 function load(key, def) { try { return JSON.parse(localStorage.getItem(key)) ?? def; } catch { return def; } }
@@ -28,6 +37,7 @@ function save(key, obj) { try { localStorage.setItem(key, JSON.stringify(obj)); 
 function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
 
 const settings = reactive(load(LS_SETTINGS, {
+  theme: 'black',
   autoHeight: false,
   autoPrice: false,
   pollIntervalSec: 30,
@@ -42,6 +52,21 @@ function onIntervalInput(e) {
   persist();
 }
 
+function applyTheme(theme) {
+  document.body.dataset.theme = theme;
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', theme === 'bitcoin' ? '#2d293b' : '#000000');
+}
+
+function onThemeChange(){
+  applyTheme(settings.theme);
+  persist();
+}
+
 // Persist toggles immediately
 watchEffect(persist);
+
+onMounted(() => {
+  applyTheme(settings.theme);
+});
 </script>

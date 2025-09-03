@@ -19,8 +19,8 @@ export default defineConfig({
         short_name: 'BTC PWA',
         start_url: '.',
         display: 'standalone',
-        background_color: '#2d293b',
-        theme_color: '#2d293b',
+        background_color: '#000000',
+        theme_color: '#000000',
         description:
           'cashu.me-inspired installable PWA with block height, price, and a USD↔sats converter.',
         icons: [
