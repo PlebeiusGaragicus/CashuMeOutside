@@ -15,18 +15,12 @@
       </div>
     </div>
 
-    <header class="container">
-      <div class="row space-between middle">
-        <div class="row middle gap">
-          <button class="btn btn-ghost hamburger-btn" aria-label="Menu" @click="toggleDrawer">
-            <span class="hamburger" aria-hidden="true"></span>
-          </button>
-          <div>
-            <h1>Bitcoin PWA Template</h1>
-            <p class="subtitle">cashu.me-inspired, lightweight, installable PWA</p>
-          </div>
-        </div>
-        <div class="row gap middle">
+    <header class="app-header">
+      <div class="toolbar">
+        <button class="btn btn-ghost hamburger-btn" aria-label="Menu" @click="toggleDrawer">
+          <span class="hamburger" aria-hidden="true"></span>
+        </button>
+        <div class="row gap middle" style="margin-left:auto;padding:0 16px;">
           <button v-if="showInstall" class="btn" @click="triggerInstall">Install</button>
         </div>
       </div>
@@ -36,9 +30,21 @@
       <div class="backdrop" @click="closeDrawer"></div>
       <aside class="panel" @click.stop>
         <nav class="nav">
-          <RouterLink class="nav-item" to="/" @click="closeDrawer">Home</RouterLink>
-          <RouterLink class="nav-item" to="/settings" @click="closeDrawer">Settings</RouterLink>
-          <a class="nav-item" :href="repoUrl" target="_blank" rel="noopener" @click="closeDrawer">GitHub Repo</a>
+          <!-- <div class="section-header">Navigate</div> -->
+          <RouterLink class="nav-item" to="/" @click="closeDrawer">
+            <div class="item-title">Home</div>
+            <!-- <div class="item-caption">Overview</div> -->
+          </RouterLink>
+          <!-- <div class="section-header">Settings</div> -->
+          <RouterLink class="nav-item" to="/settings" @click="closeDrawer">
+            <div class="item-title">Settings</div>
+            <!-- <div class="item-caption">App preferences</div> -->
+          </RouterLink>
+          <div class="section-header">Links</div>
+          <a class="nav-item" :href="repoUrl" target="_blank" rel="noopener" @click="closeDrawer">
+            <div class="item-title">GitHub</div>
+            <!-- <div class="item-caption">Source code</div> -->
+          </a>
         </nav>
       </aside>
     </div>
