@@ -39,7 +39,7 @@ body{
   margin:0;
   background:var(--bg);
   color:var(--text);
-  font:16px/1.5 Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji;
+  font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji;
   margin-top: var(--safe-area-inset-top);
 }
 .container{max-width:880px;margin:0 auto;padding:16px}
